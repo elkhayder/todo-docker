@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+   db:
+      image: mariadb
+      restart: always
+      environment:
+         MARIADB_USER: laravel
+         MARIADB_PASSWORD: password
+         MARIADB_DATABASE: laravel
+         MARIADB_ROOT_PASSWORD: password
+      volumes:
+         - db_volume:/var/lib/mysql
+
+   server:
+      build: .
+      depends_on:
+         - db
+      # command: php artisan migrate --seed
+      environment:
+         DB_HOST: db
+         DB_DATABASE: laravel
+         DB_USERNAME: laravel
+         DB_PASSWORD: password
+      ports:
+         - "80:80"
+
+volumes:
+   db_volume:
