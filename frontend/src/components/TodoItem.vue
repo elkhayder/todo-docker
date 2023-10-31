@@ -15,7 +15,9 @@ const todosStore = useTodosStore();
 </script>
 
 <template>
-   <div class="my-2">
+   <div
+      class="my-2 rounded transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-900"
+   >
       <input
          class="hidden"
          type="checkbox"
@@ -23,7 +25,10 @@ const todosStore = useTodosStore();
          :checked="todo.done"
       />
       <label
-         class="flex items-center h-10 px-2 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900"
+         class="flex relative items-center py-2 px-2 cursor-pointer"
+         :class="{
+            'pr-8': todo.done,
+         }"
          :for="`task_${todo.id}`"
          @click="() => todosStore.toggleDone(todo.id)"
       >
@@ -44,6 +49,21 @@ const todosStore = useTodosStore();
             </svg>
          </span>
          <span class="ml-4 text-sm">{{ todo.title }}</span>
+         <button
+            v-if="todo.done"
+            @click.stop="todosStore.remove(todo.id)"
+            class="absolute right-2"
+         >
+            <svg
+               class="fill-red-500 w-4 h-4"
+               xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 30 30"
+            >
+               <path
+                  d="M 13 3 A 1.0001 1.0001 0 0 0 11.986328 4 L 6 4 A 1.0001 1.0001 0 1 0 6 6 L 24 6 A 1.0001 1.0001 0 1 0 24 4 L 18.013672 4 A 1.0001 1.0001 0 0 0 17 3 L 13 3 z M 6 8 L 6 24 C 6 25.105 6.895 26 8 26 L 22 26 C 23.105 26 24 25.105 24 24 L 24 8 L 6 8 z"
+               />
+            </svg>
+         </button>
       </label>
    </div>
 </template>

@@ -1,67 +1,72 @@
 import { defineStore } from "pinia";
-import { onMounted, reactive, ref } from "vue";
+import { computed, reactive, watch } from "vue";
 
 import type { Todo } from "../components/TodoItem.vue";
-import { ApiURL } from "../utils/constants";
+import { api } from "../utils/axios";
+import { useAuthStore } from "./AuthStore";
 
 export const useTodosStore = defineStore("todos", () => {
+   const authStore = useAuthStore();
+
    const todos = reactive<Todo[]>([]);
-   const isLoading = ref(false);
 
-   onMounted(async () => {
-      isLoading.value = true;
+   const user = computed(() => authStore.user);
 
-      const r = await fetch(ApiURL("/todos")).then((x) => x.json());
+   watch(user, async () => {
+      if (!user) return;
 
+      const r = await api.get("/todos").then((x) => x.data);
+
+      todos.length = 0;
       todos.push(...r.data);
-
-      isLoading.value = false;
    });
 
-   const toggleDone = async (id: number) => {
-      isLoading.value = true;
+   // onMounted(async () => {
+   //    if (!user) return;
 
+   //    const r = await api.get("/todos").then((x) => x.data);
+
+   //    todos.length = 0;
+   //    todos.push(...r.data);
+   // });
+
+   const toggleDone = async (id: number) => {
       const todo = todos.filter((x) => x.id == id)[0];
       if (!todo) return;
 
-      const r = await fetch(ApiURL("/todos/" + id), {
-         method: "PUT",
-         headers: {
-            "Content-Type": "application/json",
-         },
-         body: JSON.stringify({
+      await api
+         .put("/todos/" + id, {
             done: !todo.done,
-         }),
-      }).then((x) => x.json());
-
-      todo.done = r.data.done;
-
-      isLoading.value = false;
+         })
+         .then((x) => {
+            todo.done = x.data.data.done;
+         });
    };
 
    const create = async (title: string) => {
-      isLoading.value = true;
-
-      const r = await fetch(ApiURL("/todos"), {
-         method: "POST",
-         headers: {
-            "Content-Type": "application/json",
-         },
-         body: JSON.stringify({
+      await api
+         .post("/todos", {
             title,
             done: false,
-         }),
-      }).then((x) => x.json());
+         })
+         .then((x) => {
+            todos.push(x.data.data);
+         });
+   };
 
-      todos.push(r.data);
-
-      isLoading.value = false;
+   const remove = async (id: number) => {
+      api.delete("/todos/" + id).then(() => {
+         todos.splice(
+            todos.findIndex((x) => x.id == id),
+            1
+         );
+      });
    };
 
    return {
       todos,
-      isLoading,
       toggleDone,
       create,
+      remove,
    };
 });

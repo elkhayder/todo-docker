@@ -14,9 +14,9 @@ services:
 
    server:
       build: .
+      restart: always
       depends_on:
          - db
-      # command: php artisan migrate --seed
       environment:
          DB_HOST: db
          DB_DATABASE: laravel

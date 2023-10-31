@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TodoController;
-
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +16,11 @@ use App\Http\Controllers\TodoController;
 |
 */
 
-Route::apiResources([
-    'todos' => TodoController::class,
-]);
+Route::get('/auth', [UserController::class, 'me'])->middleware('auth:sanctum');
+
+Route::post('/auth/login', [UserController::class, 'login']);
+Route::post('/auth/register', [UserController::class, 'register']);
+
+Route::group(['middleware' => 'auth:sanctum'], function() {
+    Route::resource('todos', TodoController::class);
+});

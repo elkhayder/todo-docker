@@ -12,9 +12,9 @@ class TodoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return TodoResource::collection(Todo::all());
+        return TodoResource::collection($request->user()->todos->all());
     }
 
     /**
@@ -27,15 +27,21 @@ class TodoController extends Controller
             'done' => 'nullable|boolean',
         ]);
 
-        return new TodoResource(Todo::create($validated));
+        return new TodoResource($request->user()->todos()->create($validated));
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
-        return new TodoResource(Todo::findOrFail($id));
+        $todo = Todo::findOrFail($id);
+
+        if($todo->user_id != $request->user()->id) {
+            abort(403);
+        }
+
+        return new TodoResource($todo);
     }
 
     /**
@@ -49,6 +55,10 @@ class TodoController extends Controller
 
         $todo = Todo::findOrFail($id);
 
+        if($todo->user_id != $request->user()->id) {
+            abort(403);
+        }
+
         $todo->update($validated);
 
         return new TodoResource($todo->fresh());
@@ -57,8 +67,14 @@ class TodoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
-        Todo::findOrFail($id)->delete();
+        $todo = Todo::findOrFail($id);
+
+        if($todo->user_id != $request->user()->id) {
+            abort(403);
+        }
+
+        $todo->delete();
     }
 }

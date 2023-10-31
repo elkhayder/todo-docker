@@ -58,4 +58,4 @@ EXPOSE 80
 WORKDIR /var/www/html/backend
 
 #Serve
-CMD ["apachectl", "-D", "FOREGROUND"]
+CMD php artisan migrate && apachectl -D FOREGROUND
