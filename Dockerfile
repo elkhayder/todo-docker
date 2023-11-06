@@ -49,6 +49,7 @@ RUN cd /var/www/html/frontend && \
     mv composer.phar /usr/local/bin/composer && \
     # Install vendor packages
     composer install --optimize-autoloader --no-dev && \
+    cp .env.example .env && \
     # Generate cache key
     php artisan key:generate && \
     # Enable apache2 rewrite
